@@ -1,0 +1,1170 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Twig aus der Entwicklerperspektive &mdash; eine Expedition</title>
+    <link rel="stylesheet" href="dist/reset.css">
+    <link rel="stylesheet" href="dist/reveal.css">
+    <link rel="stylesheet" href="dist/theme/moon.css">
+    <link rel="stylesheet" href="plugin/highlight/monokai.css">
+    <style>
+        .slide-background.present > .slide-background-content {
+            transition: background-position;
+            transition-duration: 5000ms;
+        }
+
+        .reveal .slides section.title {
+            transition-delay: 1500ms;
+            transition-duration: 5000ms;
+        }
+
+        .background-50.slide-background:after {
+            display: block;
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 43, 54, .75);
+        }
+
+        .slow-bg-transition.slide-background {
+            transition-duration: 8000ms;
+        }
+
+        @font-face {
+            font-family: "Architects Daughter";
+            src: local("Architects Daughter"),
+            url("fonts/architects-daughter-v6-latin-regular.woff2") format("woff2"),
+            url("fonts/architects-daughter-v6-latin-regular.woff") format("woff");
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        code.no-xml-highlight .language-xml .hljs-tag, code .language-xml .hljs-name {
+            color: revert;
+        }
+
+        .code-token {
+            background-color: #272822;
+            color: #dddddd;
+            border-radius: 5px;
+            padding: .1em .4em;
+            font-size: .85em;
+        }
+
+        .node-visitor {
+            position: absolute;
+            width: 6em;
+            height: 6em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffddae;
+            border-radius: 50%;
+            opacity: .9 !important;
+        }
+
+        .token-parser {
+            position: absolute;
+            width: 6em;
+            height: 6em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffddae;
+            border-radius: 20%;
+            opacity: .92 !important;
+        }
+
+        .waypoint {
+            position: absolute;
+            border-left: 3px #fcfbf0 solid;
+            height: 3.5em;
+        }
+
+        .waypoint span {
+            background-color: #fcfbf0;
+            color: #5c5553;
+            padding: .2em .4em;
+            white-space: nowrap;
+            margin-left: -2.5em;
+        }
+
+    </style>
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+
+        <section>
+            <section data-background-image="images/clouds1.jpg" class="slow-bg-transition"></section>
+            <section data-background-image="images/birdeye.jpg" class="slow-bg-transition title" data-transition="fade">
+                <h1 style="opacity: .7; font-size: 8em">Twig</h1>
+                <h2 style="margin-top: -1em" class="fragment fade">aus der Entwicklerperspektive</h2>
+            </section>
+
+            <section data-background-image="images/expedition.jpg" data-transition="fade">
+                <div class="fragment fade"
+                     style="background-color: #dacab6; margin-right: 10em; text-align: left; padding: .5em 1em 1em; font-family: monospace; color: black; transform: rotate(-1deg); box-shadow: rgba(0, 0, 0, 0.3) 20px 20px 20px; font-size: 0.9em">
+                    <p>Die heutige Expedition wird geleitet von…</p>
+                    <ul style="list-style-type: square">
+                        <li><span style="font-size: 0.8em; color: #666">Name:</span> Moritz Vondano</li>
+                        <li><span style="font-size: 0.8em; color: #666">GitHub:</span> @m-vo</li>
+                        <li>#Contao Core<br>#Twig für Contao</li>
+                    </ul>
+                </div>
+            </section>
+        </section>
+
+        <!-- ------------------------------------------------------------------------------------------------------- -->
+
+        <section><h3>Tal der unzähligen Anforderungen</h3><h4
+                style="margin-bottom: 1em; margin-top: -.75em; opacity: .5">
+            Packen & Los geht's</h4>01
+        </section>
+        <section>
+            <section>
+                <figure style="padding: 2em">
+                    <img src="images/rasmus-origins.png">
+                    <figcaption style="margin-top: -20px; margin-right: 50px; font-size: .5em; text-align: right">
+                        <b>&copy; Rasmus Lerdorf</b> | 25 years of PHP | 2019
+                    </figcaption>
+                </figure>
+            </section>
+
+            <section>
+                <pre><code class="hljs" data-trim>
+                &lt;html&gt;
+                    &lt;title&gt;&lt;?= $this-&gt;title ?&gt;&lt;/title&gt;
+                    &lt;body&gt;
+                        &lt;main id=&quot;main&quot;&gt;
+                          &lt;div class=&quot;inside&quot;&gt;
+                            &lt;?= $this-&gt;main ?&gt;
+                          &lt;/div&gt;
+                            &lt;?php $this-&gt;sections('main'); ?&gt;
+                        &lt;/main&gt;
+                    &lt;/body&gt;
+                &lt;/html&gt;
+            </code></pre>
+            </section>
+        </section>
+
+        <section data-transition="fade">
+            <section>
+                Neue Anforderungen,<br>neue Möglichkeiten.
+            </section>
+            <section>
+                … eine schöne Syntax<i style="padding-left: 15px; color: #a6e22e">🗸</i>
+                <pre><code class="twig" data-trim>
+                    Glückwunsch, {{ destination }} ist unser schönstes Ziel!
+                </code></pre>
+            </section>
+            <section data-transition="fade">
+                … eine schöne und mächtige Syntax<i style="padding-left: 15px; color: #a6e22e">🗸</i>
+                <pre><code class="twig" data-trim>
+                    Glückwunsch, {{ destination }} ist unser schönstes Ziel!
+
+                    Du benötigst dafür:
+                    {% for thing in packing_list %}
+                     - {{ thing }}
+                    {% endfor %}
+                </code></pre>
+            </section>
+            <section data-transition="fade">
+                … eine schöne und <b style="text-decoration: underline">mächtige</b> Syntax<i
+                    style="padding-left: 15px; color: #a6e22e">🗸</i>
+                <pre><code class="twig" data-trim>
+                    {# Psst, this is a lie! #}
+                    Glückwunsch, {{ destination }} ist unser schönstes Ziel!
+                    Schwierigkeitsgrad: {{ (stats.deaths_per_year / 3)|round }}.
+
+                    {% if date(last_incident) < date('-3days') %}
+                       * Diese Route gilt als sehr sicher! *
+                    {% endif %}
+
+                    Du benötigst dafür:
+                    {% for thing in packing_list %}
+                     - {{ thing }}
+                    {% endfor %}
+                </code></pre>
+            </section>
+            <section data-transition="fade">
+                … <b style="text-decoration: underline">mehr mehr mächtig</b>!<i
+                    style="padding-left: 15px; color: #a6e22e">🗸</i>
+                <pre><code class="twig" data-trim>
+                    {% extends "expedition_list.html.twig" %}
+
+                    {% block info %}
+                        {# Psst, this is a lie! #}
+                        Glückwunsch, {{ destination }} ist unser schönstes Ziel!
+                        Schwierigkeitsgrad: {{ (stats.deaths_per_year / 3)|round }}.
+
+                        {{ parent() }}
+
+                        {% if date(stats.last_incident) < date('-3days') %}
+                           * Diese Route gilt als sehr sicher! *
+                        {% endif %}
+                    {% endblock %}
+                </code></pre>
+            </section>
+            <section data-transition="fade">
+                <span class="fragment">…  doch nicht sooo mächtig 😳</span>
+                <pre><code class="twig" data-trim>
+                    {% block user_info %}
+                        {% eval %}
+                            $db = new mysqli('localhost', 'admin', 's3cr3t');
+                            $user = $db->query(
+                                &quot;SELECT name, lastname
+                                 FROM users
+                                 WHERE id=' ~ {{ user_id }} ~ '&quot;
+                            );
+                        {% endeval %}
+
+                        […]
+
+                    {% endblock %}
+                </code></pre>
+            </section>
+        </section>
+
+        <section>
+            … Sicherheit<i class="fragment" data-fragment-index="4" style="padding-left: 15px; color: #a6e22e">🗸</i>
+
+            <div style="display: flex; justify-content: space-evenly; margin: 1em 0;">
+                <div style="padding: .5em; width: 2.5em; height: 2.5em; background-color: red; color:white; display: flex; align-items: center; justify-content: center">
+                    red
+                </div>
+                <div class="fragment" data-fragment-index="1"
+                     style="padding: .5em; width: 2.5em; height: 2.5em; background-color: green; color:white; display: flex; align-items: center; justify-content: center">
+                    green
+                </div>
+                <div class="fragment" data-fragment-index="2"
+                     style="padding: .5em; width: 2.5em; height: 2.5em; background-color: blue; color:white; display: flex; align-items: center; justify-content: center">
+                    blue
+                </div>
+                <div class="r-stack">
+                    <div class="fragment alert fade-in-then-out" data-fragment-index="3"
+                         style="width: 2.5em; height: 2.5em; background-color: dimgray; color:white; display: flex; align-items: center; justify-content: center">
+                        <span style="margin-left: 2em">XSS&nbsp;alert(1)</span>
+                    </div>
+                    <div class="fragment" data-fragment-index="4"
+                         style="padding: calc(.5em - 5px); width: 2.5em; height: 2.5em; border: solid 5px dimgray; display: flex; align-items: center; justify-content: center">
+                        alert(1)
+                    </div>
+                </div>
+            </div>
+            <div class="r-stack" style="position: relative">
+                <pre class="fragment fade-out" data-fragment-index="4"><code class="html" data-trim>
+                    &lt;?php /* boxes.html5 */ ?&gt;
+
+                    &lt;style&gt;
+                      .box {
+                        background: &lt;?php echo $this-&gt;color; ?&gt;
+                      }
+                    &lt;/style&gt;
+
+                    &lt;div class="box"&gt;&lt;?php echo $this-&gt;color; ?&gt;&lt;/div&gt;
+                </code></pre>
+                <pre class="fragment" data-fragment-index="4"><code class="twig" data-trim>
+                    {# boxes.html.twig #}
+
+                    &lt;style&gt;
+                      .box {
+                        background: {{ color|escape('css') }}
+                      }
+                    &lt;/style&gt;
+
+                    &lt;div class="box"&gt;{{ color|escape('html') }}&lt;/div&gt;
+                </code></pre>
+                <pre class="fragment" data-fragment-index="5"><code class="twig" data-trim>
+                    {# boxes.html.twig #}
+
+                    &lt;style&gt;
+                      .box {
+                        background: {{ color|escape('css') }}
+                      }
+                    &lt;/style&gt;
+
+                    &lt;div class="box"&gt;{{ color }}&lt;/div&gt;
+                </code></pre>
+                <div class="fragment" data-fragment-index="5"
+                     style="position: absolute; top: 3.5em; left: 9em; transform: rotate(-10deg); display: flex; gap: 10px; color: #b3b3b3">
+                    <img src="images/contao_arrow.svg" style="transform: rotate(20deg)">
+                    <span style="font-family: 'Architects Daughter', cursive;">autoescape</span>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            … Erweiterbarkeit<i class="fragment" data-fragment-index="1"
+                                style="padding-left: 15px; color: #a6e22e">🗸</i>
+
+            <div style="background-color: #1b4662; text-align: left; color: #fff; font-size: .8em; padding: .1em 1em 1em; margin: 1em 0; font-family: monospace">
+                <p>Highlights auf deiner Route:</p>
+                <ul style="margin-left: 1.5em; position: relative">
+                    <li>Quelle des Glücks<i class="fragment" data-fragment-index="1"> ⛲</i></li>
+                    <li>️Gipfel der Vernunft<i class="fragment" data-fragment-index="1"> 🏔</i></li>
+                    <li>Wald vor Bäumen<i class="fragment" data-fragment-index="1"> 🌳</i></li>
+                </ul>
+                <div class="fragment fade-out" data-fragment-index="1"
+                     style="position: absolute; top: 5.4em; left: 14em; transform: rotate(20deg); display: flex; gap: 10px; color: #b3b3b3">
+                    <img src="images/contao_arrow.svg" style="transform: rotate(4deg)">
+                    <span style="font-family: 'Architects Daughter', cursive;">Boring!</span>
+                </div>
+                <div class="fragment" data-fragment-index="1"
+                     style="position: absolute; top: 5.4em; left: 15em; transform: rotate(25deg); display: flex; gap: 13px; color: #b3b3b3">
+                    <img src="images/contao_arrow.svg" style="transform: rotate(20deg); margin-top: 15px;">
+                    <span style="font-family: 'Architects Daughter', cursive;">Nice!</span>
+                </div>
+            </div>
+
+            <div class="r-stack">
+                <pre class="fragment fade-out" data-fragment-index="1"><code class="twig" data-trim>
+                    {# track_description.md.twig #}
+
+                    Highlights auf deiner Route:
+
+                    {% for highlight in track.highlights %}
+                      * {{ highlight }}
+                    {% endfor %}
+                </code></pre>
+                <pre class="fragment" data-fragment-index="1"><code class="twig" data-trim>
+                    {# track_description.md.twig #}
+
+                    Highlights auf deiner Route:
+
+                    {% for highlight in track.highlights %}
+                      * {{ highlight|emojify }}
+                    {% endfor %}
+                </code></pre>
+            </div>
+        </section>
+
+        <section>
+            <section data-background-image="images/river-calm.jpg"></section>
+            <section data-background-image="images/river-lightning.jpg" data-transition="fade">
+                <div class="fragment"
+                     style="padding: .5em; background-image: linear-gradient(to right, transparent, rgba(0, 0, 0, .5), transparent);">
+                    … Performance<i style="padding-left: 15px; color: #a6e22e">🗸</i></div>
+            </section>
+        </section>
+
+        <section data-background-image="images/cave-entrance.jpg" data-transition="fade"></section>
+
+        <!-- ------------------------------------------------------------------------------------------------------- -->
+
+        <section><h3>Abstieg in die Tiefen</h3><h4 style="margin-bottom: 1em; margin-top: -.75em; opacity: .5">
+            Höhlen der Compiler-Maschinerie</h4>02
+        </section>
+
+        <section>
+            <section data-background-image="images/cave.jpg" data-transition="fade"></section>
+            <section data-background-image="images/machinery-total.jpg" data-transition="fade"></section>
+        </section>
+
+        <section data-background-image="images/blueprint-parallax.jpg" data-background-position="0% 50%">
+            <div class="r-stack">
+                <div data-parallax-offset="35" class="fragment">
+                    <h3>Compiler-Workflow</h3>
+                    <ol style="padding-left: 5em">
+                        <li class="fragment">Lexen/Parsen</li>
+                        <li class="fragment">AST bearbeiten</li>
+                        <li class="fragment">Code generieren (compilen)</li>
+                    </ol>
+                </div>
+                <div data-parallax-offset="60" class="fragment"
+                     style="background-color: #dad2bf; box-shadow: rgba(0, 0, 0, .6) 5px 5px 20px; padding: 1em; transform: rotate(-2deg); min-width: 60%; margin-left: -3.5em; margin-top: -.5em">
+                    <pre style="display: contents"><code class="hljs twig no-xml-highlight" data-trim>
+                        Hallo {{ firstname }},
+                        hier ist deine Route:
+
+                        {% for waypoint in route %}
+                          &lt;br&gt; {{ waypoint }}
+                        {% endfor %}
+                    </code></pre>
+                </div>
+                <div data-parallax-offset="80" class="fragment fade-in"
+                     style="background-color: #dad2bf; box-shadow: rgba(0, 0, 0, .6) 5px 5px 20px; padding: 1em; transform: rotate(3deg); min-width: 50%; margin-top: 5em">
+                    <div style="font-family: monospace; color: black; font-size: .6em; display: flex; flex-wrap: wrap; gap:.2em">
+                        <span class="code-token">TEXT_TYPE(Hallo )</span>
+                        <span class="code-token" style="color: #a6e22e">VAR_START_TYPE()</span>
+                        <span class="code-token" style="color: #a6e22e">NAME_TYPE(firstname)</span>
+                        <span class="code-token" style="color: #a6e22e">VAR_END_TYPE()</span>
+                        <span class="code-token">TEXT_TYPE(, hier ist deine Route:)</span>
+                        <span class="code-token" style="color: #a6e22e">BLOCK_START_TYPE()</span>
+                        <span class="code-token" style="color: #f92672">NAME_TYPE(for)</span>
+                        <span class="code-token">NAME_TYPE(waypoint)</span>
+                        <span class="code-token" style="color: #f92672">OPERATOR_TYPE(in)</span>
+                        <span class="code-token">NAME_TYPE(route)</span>
+                        <span class="code-token" style="color: #a6e22e">BLOCK_END_TYPE()</span>
+                        <span class="code-token">TEXT_TYPE( &lt;br&gt; )</span>
+                        <span class="code-token" style="color: #a6e22e">VAR_START_TYPE()</span>
+                        <span class="code-token" style="color: #a6e22e">NAME_TYPE(waypoint)</span>
+                        <span class="code-token" style="color: #a6e22e">VAR_END_TYPE()</span>
+                        <span class="code-token" style="color: #a6e22e">BLOCK_START_TYPE()</span>
+                        <span class="code-token" style="color: #f92672">NAME_TYPE(endfor)</span>
+                        <span class="code-token" style="color: #a6e22e">BLOCK_END_TYPE()</span>
+                        <span class="code-token">EOF_TYPE()</span>
+                    </div>
+                </div>
+                <div data-parallax-offset="90" class="fragment fade-in"
+                     style="background-color: #dad2bf; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; padding: 0.2em; transform: rotate(-1deg); min-width: 80%; margin-left: 1.5em">
+                    <pre style="font-family: monospace; color: black; font-size: .5em; box-shadow: none; padding-right: 2em">
+<span class="code-token" style="color: #a6a6a6">ModuleNode</span>
+  ├──<span class="code-token">TextNode('Hallo')</span>
+  ├──<span class="code-token" style="color: #a6e22e">PrintNode</span>
+  │   └──<span class="code-token" style="color: #61aaff">NameExpression('firstname')</span>
+  ├──<span class="code-token">TextNode(', hier ist deine Route:')</span>
+  └──<span class="code-token" style="color: #f92672">ForNode</span>
+      ├──<span class="code-token" style="color: #919191">Node</span>
+      │   ├──value_target: <span class="code-token" style="color: #9871ff">AssignNameExpression('waypoint')</span>
+      │   ├──seq:          <span class="code-token" style="color: #61aaff">NameExpression('route')</span>
+      │   └──body:
+      │      ├──<span class="code-token">TextNode(' &lt;br&gt; ')</span>
+      │      └──<span class="code-token" style="color: #a6e22e">PrintNode</span>
+      │          └──<span class="code-token" style="color: #61aaff">NameExpression('waypoint')</span>
+      └──<span class="code-token" style="color: #f92672">ForLoopNode</span>
+                    </pre>
+                </div>
+                <div data-parallax-offset="100" class="fragment fade-in"
+                     style="background-color: #dad2bf; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; padding: 0.2em; transform: rotate(1deg); min-width: 80%; margin-left: -.5em">
+                    <pre style="font-family: monospace; color: black; font-size: .5em; box-shadow: none; padding-right: 2em">
+<span class="code-token" style="color: #a6a6a6">ModuleNode</span>
+  ├──<span class="code-token">TextNode('Hallo')</span>
+  ├──<span class="code-token" style="color: #a6e22e">PrintNode</span>
+  │   └──<span class="code-token" style="color: #a6e22e">FilterExpression</span>
+  │      ├──node:     <span class="code-token" style="color: #61aaff">NameExpression('firstname')</span>
+  │      ├──filter:   <span class="code-token" style="color: #e3b10d">ConstantExpression('escape')</span>
+  │      └──arguments:[<span class="code-token" style="color: #e3b10d">ConstantExpression('html')</span>]
+  ├──<span class="code-token">TextNode(', hier ist deine Route:')</span>
+  └──<span class="code-token" style="color: #f92672">ForNode</span>
+      ├──<span class="code-token" style="color: #919191">Node</span>
+      │   ├──value_target: <span class="code-token" style="color: #9871ff">AssignNameExpression('waypoint')</span>
+      │   ├──seq:          <span class="code-token" style="color: #61aaff">NameExpression('route')</span>
+      │   └──body:
+      │      ├──<span class="code-token">TextNode(' &lt;br&gt; ')</span>
+      │      └──<span class="code-token" style="color: #a6e22e">PrintNode</span>
+      │          └──<span class="code-token" style="color: #a6e22e">FilterExpression</span>
+      │              ├──node:     <span class="code-token" style="color: #61aaff">NameExpression('waypoint')</span>
+      │              ├──filter:   <span class="code-token" style="color: #e3b10d">ConstantExpression('escape')</span>
+      │              └──arguments:[<span class="code-token" style="color: #e3b10d">ConstantExpression('html')</span>]
+      └──<span class="code-token" style="color: #f92672">ForLoopNode</span>
+                    </pre>
+                </div>
+                <div data-parallax-offset="100" class="fragment fade-in"
+                     style="background-color: #dad2bf; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; padding: 0.2em; transform: rotate(-1deg); min-width: 90%;">
+                    <pre style="display: contents"><code class="hljs php" data-trim
+                                                         style="font-size: .75em; max-height: unset">
+                        &lt;?php
+
+                        class __TwigTemplate_bbb7da3f704a85b7f7a47f925a470c9b extends Template
+                        {
+                            protected function doDisplay(array $context)
+                            {
+                                echo &quot;Hallo &quot;;
+                                echo $this-&gt;env-&gt;getFilter('escape')-&gt;getCallable()(
+                                    $this-&gt;env, $context[&quot;firstname&quot;], &quot;html&quot;
+                                );
+                                echo &quot;, hier ist deine Route:&quot;;
+
+                                $context['_parent'] = $context;
+                                $context['_seq'] = $context[&quot;route&quot;];
+                                foreach ($context['_seq'] as $context[&quot;waypoint&quot;]) {
+                                    echo &quot; &lt;br&gt; &quot;;
+                                    echo $this-&gt;env-&gt;getFilter('escape')-&gt;getCallable()(
+                                        $this-&gt;env, $context[&quot;waypoint&quot;], &quot;html&quot;
+                                    );
+                                }
+                                $_parent = $context['_parent'];
+                            }
+                        }
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <section data-background-image="images/machinery1.jpg" data-transition="fade">
+                <div style="position:relative;">
+                    <div class="fragment node-visitor" style="background-color: #547077; left: -3em; top: 2.5em"><span>Escaper</span><span
+                            style="font-size: .75em">NodeVisitor</span></div>
+                    <div class="fragment node-visitor" style="background-color: #8a6544; left: 7.5em; top: 0.5em"><span>SafeAnalysis</span><span
+                            style="font-size: .75em">NodeVisitor</span></div>
+                    <div class="fragment node-visitor" style="background-color: #564731; right: 2em; top: 6em"><span>Optimizer</span><span
+                            style="font-size: .75em">NodeVisitor</span></div>
+                </div>
+            </section>
+            <section data-background-image="images/machinery2.jpg" data-transition="fade">
+                <div style="position:relative;">
+                    <div class="fragment node-visitor" style="background-color: #916e49; left: .5em; top: 0.5em">
+                        <span>Php</span><span style="margin-top: -.4em">Template</span><span
+                            style="margin-top: -.4em">Proxy</span><span style="font-size: .75em">NodeVisitor</span>
+                    </div>
+                    <div class="fragment node-visitor" style="background-color: #536c70; right: -1em; top: 4em">
+                        <span>Contao</span><span style="margin-top: -.4em">Escaper</span><span style="font-size: .75em">NodeVisitor</span>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- ------------------------------------------------------------------------------------------------------- -->
+
+        <section><h3>Etappe ins Zentrum</h3><h4 style="margin-bottom: 1em; margin-top: -.75em; opacity: .5">
+            Symfony-Land</h4>03
+        </section>
+
+        <section>
+            <section data-background-image="images/hiking.jpg"></section>
+            <section data-background-image="images/serene1.jpg"></section>
+            <section data-background-image="images/reality.jpg"></section>
+        </section>
+
+        <section>
+            <section data-transition="fade-out">
+                <h3>Twig in Symfony
+                    <span class="r-stack" style="display: inline-grid">
+                    <span>😊</span>
+                    <span class="fragment" data-fragment-index="5">🙃</span>
+                    <span class="fragment" data-fragment-index="6">😯</span>
+                    <span class="fragment" data-fragment-index="7">😬</span>
+                </span>
+                </h3>
+                <ul style="position: relative">
+                    <li class="fragment" data-fragment-index="1">Templates aus dem Filesystem (<span
+                            style="font-family: monospace; font-size: .9em; color: #5ca0bb">FilesystemLoader</span>),
+                        organisiert in Namespaces (<span style="font-size: .9em; color: #cecece">@…</span>)
+                        <ul>
+                            <li class="fragment" data-fragment-index="2">Bundles ➡️ <span class="code-token"><span
+                                    style="color: #9ed300">@NatureBundle</span>/mountain/trail.html.twig</span>
+                            </li>
+                            <li class="fragment" data-fragment-index="3">App ➡️ <span class="code-token"><span
+                                    style="color: #ffb120">@__main__</span>/bucket_list.html.twig</span></li>
+                        </ul>
+                    </li>
+                    <li class="fragment" data-fragment-index="4" style="margin-top: .5em">Logische Namen sind
+                        eindeutig<br><span
+                                style="font-family: monospace; font-size: .9em; color: #5ca0bb">$loader->exists()</span>
+                    </li>
+                    <li class="fragment" data-fragment-index="5" style="margin-top: .5em">Templates lassen sich in der
+                        App
+                        überschreiben
+                        <ul>
+                            <li>templates/bundles/<em>&lt;Bundle&gt;</em> ➡️ <span class="code-token"><span
+                                    style="color: #9ed300">@&lt;Bundle&gt;</span>/…</span>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="fragment" data-fragment-index="6"
+                     style="position: absolute; top:2.5em; left: 2em; background-color: #dad2bf; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; padding: 0.2em; transform: rotate(-1deg)">
+                <pre style="display: contents"><code class="hljs twig" data-trim>
+                    {# templates/bundles/NatureBundle/mountain/trail.html.twig #}
+
+                    &lt;div class=&quot;trail-map&quot; data-map&gt;
+                        &lt;script type=&quot;application/json&quot;&gt;
+                            {{ trail_data|json_encode }}
+                        &lt;/script&gt;
+                    &lt;/div&gt;
+
+                    {# todo: re-add the original stuff here #}
+                </code></pre>
+                </div>
+                <div class="fragment" data-fragment-index="7"
+                     style="position: absolute; top:2.5em; left: 4em; background-color: #dad2bf; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; padding: 0.2em; transform: rotate(2deg)">
+                <pre style="display: contents"><code class="hljs twig" data-trim>
+                    {# templates/bundles/NatureBundle/mountain/trail.html.twig #}
+                    {% extends &quot;@NatureBundle/mountain/trail.html.twig&quot; %}
+
+                    {% block main %}
+                        {{ parent() }}
+
+                        &lt;div class=&quot;trail-map&quot; data-map&gt;
+                            &lt;script type=&quot;application/json&quot;&gt;
+                                {{ trail_data|json_encode }}
+                            &lt;/script&gt;
+                        &lt;/div&gt;
+                    {% endblock %}
+                </code></pre>
+                </div>
+            </section>
+
+            <section data-background-image="images/boom.jpg"></section>
+
+            <section data-transition="fade">
+                <h3>Twig in Symfony 🫣</h3>
+                <ul style="position: relative">
+                    <li>Templates aus dem Filesystem
+                        <ul>
+                            <li>Bundles ➡️ <span class="code-token"><span style="color: #9ed300">@NatureBundle</span>/mountain/trail.html.twig</span>
+                            </li>
+                            <li>App ➡️ <span class="code-token"><span
+                                    style="color: #ffb120">@__main__</span>/bucket_list.html.twig</span></li>
+                        </ul>
+                    </li>
+                    <li style="margin-top: .5em">Logische Namen sind eindeutig</li>
+                    <li style="margin-top: .5em">Templates lassen sich in der App überschreiben
+                        <ul>
+                            <li>templates/bundles/<em>&lt;Bundle&gt;</em> ➡️ <span class="code-token"><span
+                                    style="color: #9ed300">@&lt;Bundle&gt;</span>/…</span>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <div style="position: absolute; top:2.5em; left: 2em; background-color: #dad2bf; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; padding: 0.2em; transform: rotate(-1deg)">
+                <pre style="display: contents"><code class="hljs twig" data-trim>
+                    {# templates/bundles/NatureBundle/mountain/trail.html.twig #}
+
+                    &lt;div class=&quot;trail-map&quot; data-map&gt;
+                        &lt;script type=&quot;application/json&quot;&gt;
+                            {{ trail_data|json_encode }}
+                        &lt;/script&gt;
+                    &lt;/div&gt;
+
+                    {# todo: re-add the original stuff here #}
+                </code></pre>
+                </div>
+                <div style="position: absolute; top:2.5em; left: 4em; background-color: #dad2bf; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; padding: 0.2em; transform: rotate(2deg)">
+                <pre style="display: contents"><code class="hljs twig" data-trim>
+                    {# templates/bundles/NatureBundle/mountain/trail.html.twig #}
+                    {% extends "@NatureBundle/mountain/trail.html.twig" %}
+
+                    {% block main %}
+                        {{ parent() }}
+
+                        &lt;div class="trail-map" data-map&gt;
+                            &lt;script type="application/json"&gt;
+                                {{ trail_data|json_encode }}
+                            &lt;/script&gt;
+                        &lt;/div&gt;
+                    {% endblock %}
+                </code></pre>
+                </div>
+                <div class="fragment"
+                     style="position: absolute; top:2.5em; left: 4em; background-color: #dad2bf; padding: 0.2em; transform: rotate(2deg)">
+                <pre style="display: contents"><code class="hljs twig" data-trim>
+                    {# templates/bundles/NatureBundle/mountain/trail.html.twig #}
+                    {% extends "@!NatureBundle/mountain/trail.html.twig" %}
+
+                    {% block main %}
+                        {{ parent() }}
+
+                        &lt;div class="trail-map" data-map&gt;
+                            &lt;script type="application/json"&gt;
+                                {{ trail_data|json_encode }}
+                            &lt;/script&gt;
+                        &lt;/div&gt;
+                    {% endblock %}
+                </code></pre>
+                    <div class="fragment"
+                         style="position: absolute; top: 1.7em; left: 4.8em; transform: rotate(5deg); display: flex; gap: 10px; color: #b3b3b3">
+                        <img src="images/contao_arrow.svg" style="transform: scaleX(-1) rotate(195deg); margin-top: 0">
+                        <span style="font-family: 'Architects Daughter', cursive;">WTF?</span>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+            <pre><code class="hljs twig" data-trim>
+                {# scenery.twig #}
+                {% block view %}
+                    🌲🌳🌲
+                {% endblock %}
+            </code></pre>
+
+                <pre class="fragment" data-fragment-index="1"><code class="hljs twig" data-trim>
+                {# peaceful_scenery.twig #}
+                {% extends "scenery.twig" %}
+
+                {% block view %}
+                       🕊️
+                    {{ parent() }}
+                {% endblock %}
+            </code></pre>
+
+                <pre class="fragment" data-fragment-index="2"><code class="hljs twig" data-trim>
+                {# cloudy_scenery.twig #}
+                {% extends "peaceful_scenery.twig" %}
+
+                {% block view %}
+                    ☁️🌤️☁️
+                    {{ parent() }}
+                {% endblock %}
+            </code></pre>
+
+                <div style="position: absolute; top:1.8em; right: 2em; background-color: #dad2bf; padding: 0.2em; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; transform: rotate(2deg); font-size: 1.5em">
+                <pre style="display: contents"><code class="hljs" data-trim>
+                    🌲🌳🌲
+                </code></pre>
+                </div>
+                <div class="fragment" data-fragment-index="1"
+                     style="position: absolute; top:2.1em; right: 2.1em; background-color: #dad2bf; padding: 0.2em; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; transform: rotate(-2deg); font-size: 1.5em">
+                <pre style="display: contents"><code class="hljs" data-trim>
+                       🕊️
+                    🌲🌳🌲
+                </code></pre>
+                </div>
+                <div class="fragment" data-fragment-index="2"
+                     style="position: absolute; top:2.5em; right: 1.8em; background-color: #dad2bf; padding: 0.2em; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; transform: rotate(3deg); font-size: 1.5em">
+                <pre style="display: contents"><code class="hljs" data-trim>
+                    ☁️🌤️☁️
+                       🕊️
+                    🌲🌳🌲
+                </code></pre>
+                </div>
+                <div class="fragment" data-fragment-index="3"
+                     style="position: absolute; bottom: 2.0em; left: 7.5em; transform: rotate(5deg); display: flex; gap: 10px; color: #b3b3b3">
+                    <img src="images/contao_arrow.svg" style="transform: scaleX(-1) rotate(185deg); margin-top: -5px">
+                    <span style="font-family: 'Architects Daughter', cursive;">scenery.twig?</span>
+                </div>
+                <div class="fragment" data-fragment-index="3"
+                     style="position: absolute; bottom:.5em; right: 3.1em; filter: grayscale(.8); background-color: #dad2bf; padding: 0.2em; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; transform: rotate(8deg); font-size: 1.5em">
+                <pre style="display: contents"><code class="hljs" data-trim>
+                    ☁️🌤️☁️
+                    🌲🌳🌲
+                </code></pre>
+                </div>
+                <div class="fragment" data-fragment-index="4"
+                     style="position: absolute; top: 1.7em; left: 6.5em; transform: rotate(-9deg); display: flex; gap: 10px; color: #b3b3b3">
+                    <img src="images/contao_arrow.svg" style="transform: rotate(5deg); margin-top: 25px">
+                    <span style="font-family: 'Architects Daughter', cursive;">render "scenery.twig" ?</span>
+                </div>
+            </section>
+        </section>
+
+
+        <!-- ------------------------------------------------------------------------------------------------------- -->
+
+        <section><h3>Langer Weg zum Ziel</h3><h4 style="margin-bottom: 1em; margin-top: -.75em; opacity: .5">
+            Twig im Contao-Ökosystem</h4>04
+        </section>
+
+        <section data-transition="fade-out">
+            <section data-background-image="images/long-path-teaser.jpg"></section>
+            <!--
+                <section data-background-image="images/long-path.jpg" data-transition="fade-out">
+                    <div style="perspective: 570px; perspective-origin: 30px -230px; position: relative; font-size: .9em;">
+                        <div class="fragment waypoint" style="left: 16.4em; transform: translateZ(150px)">
+                            <span>Input Encoding</span></div>
+                        <div class="fragment waypoint" style="left: 17.5em; transform: translateZ(-10px); height: 3em">
+                            <span>Legacy Interop</span>
+                        </div>
+                        <div class="fragment waypoint" style="left: 16em; transform: translateZ(-200px); height: 4.8em">
+                            <span>"Multi-Tenant" Vererbung</span>
+                        </div>
+                        <div class="fragment waypoint"
+                             style="left: 13.8em; transform: translateZ(-460px); height: 6em"><span
+                                style="margin-left: -3em">Core Templates, Runtimes & mehr</span></div>
+                        <div class="fragment waypoint" style="left: 7em; transform: translateZ(-500px); height: 3.1em"><span
+                                style="margin-left: -6em">Backend Integration</span></div>
+                        <div class="fragment waypoint"
+                             style="left: -4em; transform: translateZ(-1200px); height: 4.5em; top: 1em"><span>Community Adoption</span>
+                        </div>
+                    </div>
+                </section>
+            -->
+            <section data-background-image="images/long-path_0.jpg" data-background-transition="none"></section>
+            <section data-background-image="images/long-path_1.jpg" data-background-transition="none"></section>
+            <section data-background-image="images/long-path_2.jpg" data-background-transition="none"></section>
+            <section data-background-image="images/long-path_3.jpg" data-background-transition="none"></section>
+            <section data-background-image="images/long-path_4.jpg" data-background-transition="none"></section>
+            <section data-background-image="images/long-path_5.jpg" data-background-transition="none"></section>
+            <section data-background-image="images/long-path_6.jpg" data-background-transition="none"></section>
+        </section>
+
+        <section data-transition="fade" data-background-image="images/clouds2.jpg" class="background-50 slow-bg-transition">
+            <div class="r-stack">
+                <img class="fragment" src="images/contao-tree.jpg"
+                     style="transform: rotate(-2deg); border: 15px solid #fff; box-shadow: rgba(0, 0, 0, .8) 0 0 30px">
+                <div class="fragment"
+                     style="transform: rotate(2deg); border: 15px solid #fff; box-shadow: rgba(0, 0, 0, .8) 0 0 30px; height: 95%; width: 95%; background-color: #fff; display: flex; justify-content: space-between">
+                    <div style="width: 55%; height: 85%; margin-top: 5%; border-right: 5px solid #c0c7cb;">
+                        <div style="font-family: 'Architects Daughter', cursive; color: #1f5172; transform: rotate(-8deg); margin-top: 2%">
+                            Dear all,<br>greetings from<br>the Contao<br>ecosystem!<br><br>😘<br><br><span
+                                style="font-size: .7em">P.S. Send money!</span></div>
+                    </div>
+                    <div style="width: 10%; height: 20%; background-color: #c0c7cb; margin: .5em"></div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <section>
+                <h4>Input Encoding?</h4>
+                <p class="fragment">Output Encoding bleibt!</p>
+                <p class="fragment">Contao Templates bekommen automatisch eine eigene <em>Escaper Strategy</em> mit
+                    deaktiviertem Double Encoding.</p>
+                <div class="fragment" style="position:relative; margin-top: 1.5em">
+            <pre><code class="hljs php" data-trim>
+                /*
+                 * "contao_html" escaper strategy
+                 * @see ContaoEscaperNodeVisitor
+                 */
+                public function escapeHtml(string $string): string
+                {
+                    // […]
+                    return htmlspecialchars($string, double_encode: false);
+                }
+            </code></pre>
+                    <div class="node-visitor"
+                         style="position: absolute; right: 0; top: -1em; background-image: url(images/machinery2.jpg); background-size: 250%; background-position: 60% 80%; width: 5em; height: 5em; border: 5px solid #b4b4b4"></div>
+                </div>
+            </section>
+
+            <section>
+                <div class="r-stack">
+            <pre class="fragment" data-fragment-index="1"><code class="hljs text" data-trim>
+                title: "Route von &lt;a&gt; nach &lt;b&gt;"
+                text:  "Dieser Abschnitt hat es &lt;i&gt;wirklich&lt;/i&gt; in sich."
+            </code></pre>
+                    <pre class="fragment" data-fragment-index="3"><code class="hljs text" data-trim>
+                title: "Route von &amp;lt;a&amp;gt; nach &amp;lt;b&amp;gt;"
+                text:  "Dieser Abschnitt hat es &lt;i&gt;wirklich&lt;/i&gt; in sich."
+            </code></pre>
+                </div>
+
+                <div style="position:relative;">
+                    <pre><code class="hljs twig" data-trim>
+                        {# @Contao/my_text.html.twig #}
+                        &lt;h2&gt;{{ title }}&lt;/h2&gt;
+
+                        &lt;div class=&quot;rte&quot;&gt;
+                            {# Allow trusted HTML here #}
+                            {{ text|raw }}
+                        &lt;/p&gt;
+                    </code></pre>
+                    <div class="fragment" data-fragment-index="4"
+                         style="position:absolute; top: .95em; left: 6.5em; font-size: 22px; font-family: monospace; color: #f47c00; text-align: left; line-height: 1.4">
+                        _____<br>
+                        title|escape('contao_html')
+                    </div>
+                    <div class="fragment" data-fragment-index="4"
+                         style="position:absolute; top: 5.75em; left: 6.5em; font-size: 22px; font-family: monospace; color: #f47c00; text-align: left; line-height: 1.4">
+                        ________<br>
+                        text
+                    </div>
+                </div>
+
+                <div class="fragment" data-fragment-index="2"
+                     style="background-color: #fff; display: flex; flex-direction: column; width: 90%; margin: .75em auto;">
+                    <div style="color: black; font-size: .6em; padding: .5em">
+                        <b style="color: black; font-size: 1.2em">Route von &lt;a&gt; nach &lt;b&gt;</b><br>
+                        Dieser Abschnitt hat es <em>wirklich</em> in sich.
+                    </div>
+                    <pre style="margin: 0; width: calc(100% - 2em); border-top: 2px solid #333; background-color: #fff; padding: 1em;"><code
+                            class="hljs text" data-trim style="display: contents; color: #333">
+                &lt;h2&gt;Route von &amp;lt;a&amp;gt; nach &amp;lt;b&amp;gt;&lt;/h2&gt;
+
+                &lt;div class=&quot;rte&quot;&gt;
+                    Dieser Abschnitt hat es &lt;i&gt;wirklich&lt;/i&gt; in sich.
+                &lt;/p&gt;
+            </code></pre>
+                </div>
+            </section>
+        </section>
+
+        <section>
+            <h4>Legacy Interop?</h4>
+            <p class="fragment"><em>Twig</em> Templates können als Ersatz für existierende <em>Contao PHP</em> Templates
+                verwendet werden.</p>
+            <p class="fragment"><em>Twig</em> Templates können <em>Contao PHP</em> Templates erweitern und Blöcke
+                anpassen.<br><span style="font-family: monospace; font-size: .9em; color: #5ca0bb">{% extends "@Contao/fe_page.html5" %}</span>
+            </p>
+            <div class="fragment"
+                 style="position: absolute; top: 9.8em; left: 6em; transform: rotate(8deg); display: flex; gap: 10px; color: #b3b3b3">
+                <img src="images/contao_arrow.svg" style="transform: rotate(160deg) scaleX(-1); margin-top: -10px">
+                <span style="font-family: 'Architects Daughter', cursive;">Don't ask how. 🪄</span>
+            </div>
+        </section>
+        <section>
+            <section>
+                <h4>"Multi-Tenant" Vererbung?</h4>
+                <ul style="position: relative">
+                    <li class="fragment" data-fragment-index="1">Templates aus Contao Template-Verzeichnissen (<span
+                            style="font-family: monospace; font-size: .9em; color: #5ca0bb">ContaoFilesystemLoader</span>)
+                        <ul>
+                            <li class="fragment">Bundles ➡️ <span class="code-token"><span
+                                    style="color: #9ed300">@Contao_NatureBundle</span>/…</span>
+                            </li>
+                            <li class="fragment">App ➡️ <span class="code-token"><span
+                                    style="color: #9ed300">@Contao_App</span>/…</span>
+                            </li>
+                            <li class="fragment">Global ➡️ <span class="code-token"><span
+                                    style="color: #9ed300">@Contao_Global</span>/…</span>
+                            </li>
+                            <li class="fragment">Themes ➡️ <span class="code-token"><span
+                                    style="color: #9ed300">@Contao_Theme_my_theme</span>/…</span>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="fragment" style="margin-top: .5em">Managed Namespace: <span
+                            class="code-token"><span
+                            style="color: #f47c00">@Contao</span>/…</span>
+                    </li>
+                </ul>
+            </section>
+            <section>
+                <pre><code class="hljs twig" data-trim>
+                    {# scenery.twig (CoreBundle) #}
+                    {% block view %}
+                        🌲🌳🌲
+                    {% endblock %}
+                </code></pre>
+
+                <div style="position: relative">
+                <pre><code class="hljs twig" data-trim>
+                    {# scenery.twig (PeaceBundle) #}
+                    {% extends "@Contao/scenery.twig" %}
+
+                    {% block view %}
+                           🕊️
+                        {{ parent() }}
+                    {% endblock %}
+                </code></pre>
+                    <div class="fragment" data-fragment-index="1"
+                         style="position:absolute; top: 1em; left: 9em; font-size: 22px; font-family: monospace; color: #f47c00; text-align: left; line-height: 1.4">
+                        _________________________<br>
+                        "@Contao_CoreBundle/scenery.twig"
+                    </div>
+                </div>
+
+                <div style="position: relative">
+                <pre><code class="hljs twig" data-trim>
+                    {# scenery.twig (WeatherBundle) #}
+                    {% extends "@Contao/scenery.twig" %}
+
+                    {% block view %}
+                        ☁️🌤️☁️
+                        {{ parent() }}
+                    {% endblock %}
+                </code></pre>
+                    <div class="fragment" data-fragment-index="1"
+                         style="position:absolute; top: 1em; left: 9em; font-size: 22px; font-family: monospace; color: #f47c00; text-align: left; line-height: 1.4">
+                        _________________________<br>
+                        "@Contao_WeatherBundle/scenery.twig"
+                    </div>
+                </div>
+
+                <div style="position: absolute; top:1.8em; right: 2em; background-color: #dad2bf; padding: 0.2em; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; transform: rotate(2deg); font-size: 1.5em">
+                    <pre style="display: contents"><code class="hljs" data-trim>
+                        🌲🌳🌲
+                    </code></pre>
+                </div>
+                <div
+                        style="position: absolute; top:2.1em; right: 2.1em; background-color: #dad2bf; padding: 0.2em; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; transform: rotate(-2deg); font-size: 1.5em">
+                    <pre style="display: contents"><code class="hljs" data-trim>
+                           🕊️
+                        🌲🌳🌲
+                    </code></pre>
+                </div>
+                <div
+                        style="position: absolute; top:2.5em; right: 1.8em; background-color: #dad2bf; padding: 0.2em; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; transform: rotate(3deg); font-size: 1.5em">
+                    <pre style="display: contents"><code class="hljs" data-trim>
+                        ☁️🌤️☁️
+                           🕊️
+                        🌲🌳🌲
+                    </code></pre>
+                </div>
+
+                <div class="fragment" data-fragment-index="2"
+                     style="position: absolute; top: 5.8em; right: 1em; transform: rotate(12deg); display: flex; flex-direction: column; align-items: center; color: #b3b3b3">
+                    <img src="images/contao_arrow.svg"
+                         style="transform: rotate(-90deg) scaleX(-1); width: 1.2em; height: 1.2em; margin-bottom: 0">
+                    <span style="font-family: 'Architects Daughter', cursive;">render "@Contao/scenery.twig"</span>
+                </div>
+            </section>
+
+            <section data-background-image="images/machinery3.jpg" data-transition="fade">
+                <div style="position:relative;">
+                    <div class="fragment token-parser" style="background-color: #407a73; left: 6.5em; top: -2em"><span
+                            style="font-size: .75em">Dynamic</span>Extends<span
+                            style="font-size: .75em">TokenParser</span>
+                        <div class="fragment token-parser" style="background-color: #357950; left: 9em; top: 2em"><span
+                                style="font-size: .75em">Dynamic</span>Include<span
+                                style="font-size: .75em">TokenParser</span>
+                        </div>
+                    </div>
+                    <div class="fragment token-parser" style="background-color: #003e4d; left: 8em; top: 6em"><span
+                            style="font-size: .75em">Dynamic</span>Use<span style="font-size: .75em">TokenParser</span>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <section>
+            <section>
+                <h4>Core Templates, Runtimes & mehr?</h4>
+                <div class="fragment" style="position:relative;">
+                    <p>Runtimes für Funktionen und Filter</p>
+                    <ul style="font-size: .7em; color: #5ca0bb; display: grid; grid-template-columns: repeat(3, 1fr); gap: .2em">
+                        <li>FigureRuntime</li>
+                        <li>FormatterRuntime</li>
+                        <li>FragmentRuntime</li>
+                        <li>HighlighterRuntime</li>
+                        <li>InsertTagRuntime</li>
+                        <li>SanitizerRuntime</li>
+                        <li>SchemaOrgRuntime</li>
+                        <li>UrlRuntime</li>
+                        <li>…</li>
+                    </ul>
+                    <div class="fragment fade-in-then-out"
+                         style="position: absolute; top:4.5em; left: 2em; background-color: #dad2bf; box-shadow: rgba(0, 0, 0, .6) 5px 5px 50px; padding: 0.2em; transform: rotate(2deg)">
+                        <pre style="display: contents"><code class="hljs twig" data-trim>
+                            {# Do not replace anything, escape everything #}
+                            {{ title }} &rarr; von &amp;lt;a&amp;gt; {{br}} nach &amp;lt;b&amp;gt;
+
+                            {# Replace insert tags, escape everything #}
+                            {{ title|insert_tag }} &rarr; von &amp;lt;a&amp;gt; &amp;lt;br&amp;gt; nach &amp;lt;b&amp;gt;
+
+                            {# Replace insert tags, escape nothing #}
+                            {{ title|insert_tag|raw }} &rarr; von &lt;a&gt; &lt;br&gt; nach &lt;b&gt;
+
+                            {# Replace insert tags, escape only the text around the insert tags #}
+                            {{ title|insert_tag_raw }} &rarr; von &amp;lt;a&amp;gt; &lt;br&gt; nach &amp;lt;b&amp;gt;
+                        </code></pre>
+                    </div>
+                </div>
+            </section>
+            <section>
+                <div style="margin-top: 1em">
+                    <p>Tag für Response Context</p>
+                    <pre><code class="hljs twig" data-trim>
+                    {% add to body %}
+                        &lt;script&gt;…&lt;/script&gt;
+                    {% endadd %}
+                </code></pre>
+                </div>
+                <div class="fragment" style="margin-top: 1em">
+                    <p>Helper Klasse für <em>HtmlAttributes</em></p>
+                    <pre><code class="hljs php" data-trim>
+                        &lt;?php
+                        class HtmlAttributes {
+                           //  …
+                        }
+                    </code></pre>
+                    <pre><code class="hljs twig" data-trim>
+                        {% set box_attributes = attrs(box_attributes|default)
+                            .addClass('box')
+                            .setIfExists('data-color', color)
+                        %}
+
+                        &lt;div{{box_attributes}}&gt;…&lt/div&gt;
+                    </code></pre>
+                </div>
+            </section>
+            <section>
+                <p>Content Elemente als <em>Fragments</em> mit Twig Templates</p>
+                <ul style="font-size: .6em; color: #5ca0bb; display: grid; grid-template-columns: repeat(3, 1fr); gap: .2em">
+                    <li>CodeController</li>
+                    <li>DownloadsController</li>
+                    <li>HeadlineController</li>
+                    <li>ImagesController</li>
+                    <li>ListController</li>
+                    <li>MarkdownController</li>
+                    <li>PlayerController</li>
+                    <li>TableController</li>
+                    <li>TeaserController</li>
+                    <li>TemplateController</li>
+                    <li>TextController</li>
+                    <li>TopLinkController</li>
+                    <li>UnfilteredHtmlController</li>
+                    <li>VideoController</li>
+                    <li>…</li>
+                </ul>
+                <div class="fragment" style="margin-top: 1em">
+                    <p>Templates für wiederverwendbare Komponenten</p>
+                    <ul style="font-size: .6em; color: #54a857; display: grid; grid-template-columns: repeat(3, 1fr); gap: .2em">
+                        <li>_download.html.twig</li>
+                        <li>_figure.html.twig</li>
+                        <li>_headline.html.twig</li>
+                        <li>_list.html.twig</li>
+                        <li>_picture.html.twig</li>
+                        <li>_read_more.html.twig</li>
+                        <li>_splash_screen.html.twig</li>
+                        <li>_stylesheet.html.twig</li>
+                        <li>_table.html.twig</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section>
+                <div>
+                    <p>Debug Command</p>
+                    <pre>
+<span class="hljs"><span style="color: #75715e">$</span> vendor/bin/contao-console debug:contao-twig --tree foo/bar
+    └──<span style="color:#43a916; font-weight: bold">foo</span>
+       └──<span style="color:#43a916; font-weight: bold">bar</span> (<span style="color: #fa9d16;">@Contao/foo/bar.html.twig</span>)
+          └──templates/foo/bar.html.twig
+             <span style="color: #75715e">Original name:</span> <span style="color: #fa9d16;">@Contao_App/foo/bar.html.twig</span></span></pre>
+                </div>
+                <div class="fragment" style="margin-top: 1em">
+                    <p>IDE autocompletion</p>
+                    <img src="images/autocompletion.png" style="width: 60%; margin-top: 0">
+                </div>
+            </section>
+        </section>
+
+        <section data-transition="fade">
+            <section>. . .</section>
+            <section data-background-image="images/legacy.jpg" data-transition="fade"
+                     class="slow-bg-transition"></section>
+            <section data-background-image="images/legacy-rebuild.jpg" data-transition="fade"
+                     class="slow-bg-transition"></section>
+        </section>
+
+        <section data-background-image="images/clouds2.jpg" class="slow-bg-transition" data-transition="none"
+                 data-background-color="#000">
+            <div style="margin-left: 65%; margin-top: 35%; font-size: 0.5em; text-align: left; color: #d9dfe7; filter: drop-shadow(2px 0px 5px black)">
+                Twig aus
+                der Entwicklerperspektive<br>
+                <span style="display: inline-flex; padding-bottom: 1em; font-size: .9em">&mdash; Eine Expedition</span><br>
+                2023 | Moritz Vondano<br>
+                <span style="display: inline-flex; padding-top: 3em; font-size: .6em">Alle Hintergrundbilder sind AI-generiert via NightCafe SDXL</span>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script src="dist/reveal.js"></script>
+<script src="plugin/zoom/zoom.js"></script>
+<script src="plugin/notes/notes.js"></script>
+<script src="plugin/search/search.js"></script>
+<script src="plugin/markdown/markdown.js"></script>
+<script src="plugin/highlight/highlight.js"></script>
+<script>
+    // More info about initialization & config:
+    // - https://revealjs.com/initialization/
+    // - https://revealjs.com/config/
+    Reveal.initialize({
+        controls: true,
+        progress: false,
+        center: true,
+        hash: true,
+
+        // Learn about plugins: https://revealjs.com/plugins/
+        plugins: [RevealZoom, RevealNotes, RevealSearch, RevealMarkdown, RevealHighlight]
+    });
+
+    Reveal.on('fragmentshown', event => {
+        const offset = event.fragment.dataset.parallaxOffset ?? null;
+
+        if (offset !== null) {
+            document.querySelector('.backgrounds > .slide-background.present > .slide-background-content').style.backgroundPosition = `${offset}% 50%`;
+
+            if (offset === '100') {
+                document.querySelectorAll('.blueprint-note').forEach(el => {
+                    requestAnimationFrame(() => {
+                        el.classList.add('fade-out');
+                    });
+                });
+            }
+        }
+
+        if (event.fragment.classList.contains('alert')) {
+            setTimeout(() => alert('Oh no…!'), 500);
+        }
+    })
+</script>
+</body>
+</html>
